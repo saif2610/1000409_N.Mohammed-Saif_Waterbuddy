@@ -13,6 +13,12 @@ try:
 except Exception:
     notification = None
 
+# ---------------- MASCOTS ----------------
+MASCOT_SAD = "/mnt/data/Water_Dragon_Sad_Slim.jpg"
+MASCOT_ANGRY = "/mnt/data/Water_Dragon_Angry_Cute_Stare.jpg"
+MASCOT_HAPPY = "/mnt/data/Water_Dragon_Little_Happy_Slim.jpg"
+MASCOT_SUPER = "/mnt/data/Water_Dragon_Happy.jpg"
+
 USERS_FILE = "users.json"
 LOGS_FILE = "logs.json"
 BADGES_FILE = "badges.json"
@@ -260,6 +266,25 @@ def main():
     st.markdown(f"### 💧 Today's Hydration: **{today_total} ml / {daily_goal} ml** ({progress}%)")
     st.progress(min(progress, 100))
     st.info(get_quote())
+
+    # --------------- MASCOT LOGIC ----------------
+    if progress < 30:
+        mascot_path = MASCOT_SAD
+    elif progress < 60:
+        mascot_path = MASCOT_ANGRY
+    elif progress < 100:
+        mascot_path = MASCOT_HAPPY
+    else:
+        mascot_path = MASCOT_SUPER
+
+    # ---------------- SHOW MASCOT ON RIGHT SIDE ----------------
+    col_left, col_right = st.columns([2, 1])
+    with col_right:
+        try:
+            st.image(mascot_path, width=250, caption="Your Water Buddy 🐉")
+        except Exception:
+            # If image can't load, show a small fallback message
+            st.write("🐉 (mascot)")
 
     # ---- ⚙️ CUSTOM GOAL ----
     st.markdown("#### ⚙️ Customize Daily Goal")
