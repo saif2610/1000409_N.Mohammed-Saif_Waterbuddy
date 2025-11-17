@@ -15,14 +15,11 @@ except Exception:
 
 # ---------------- MASCOTS (robust path resolution) ----------------
 def _resolve_mascot(filename):
-    # 1) check relative to current script / working dir
     if os.path.exists(filename):
         return filename
-    # 2) fallback to /mnt/data (if you uploaded there)
     alt = os.path.join("/mnt/data", os.path.basename(filename))
     if os.path.exists(alt):
         return alt
-    # 3) not found
     return None
 
 MASCOT_SAD = _resolve_mascot("Water_Dragon_Sad_Slim.jpg")
@@ -83,7 +80,6 @@ hr {
 </style>
 """, unsafe_allow_html=True)
 
-
 # ---------------- UTILITIES ----------------
 def atomic_save(filename, data):
     s = json.dumps(data, indent=4)
@@ -92,7 +88,6 @@ def atomic_save(filename, data):
     with os.fdopen(fd, "w") as f:
         f.write(s)
     os.replace(tmp_path, filename)
-
 
 def load_data(filename):
     if os.path.exists(filename):
@@ -103,15 +98,12 @@ def load_data(filename):
                 return {}
     return {}
 
-
 def save_data(filename, data):
     atomic_save(filename, data)
-
 
 def hash_password(password):
     import hashlib
     return hashlib.sha256(password.encode()).hexdigest()
-
 
 def calculate_health_adjustment(conditions):
     multiplier = 1.0
@@ -123,7 +115,6 @@ def calculate_health_adjustment(conditions):
         multiplier += 0.15
     return multiplier
 
-
 def calculate_daily_goal(age, conditions):
     base = 2000
     if age < 18:
@@ -132,13 +123,11 @@ def calculate_daily_goal(age, conditions):
         base = 1700
     return int(base * calculate_health_adjustment(conditions))
 
-
 def sign_up(name, email, password, age, profession, health_conditions, custom_goal):
     users = load_data(USERS_FILE)
     if email in users:
         st.error("😕 Email already registered.")
         return False
-
     goal = custom_goal
     users[email] = {
         "name": name,
@@ -152,7 +141,6 @@ def sign_up(name, email, password, age, profession, health_conditions, custom_go
     save_data(USERS_FILE, users)
     return True
 
-
 def sign_in(email, password):
     users = load_data(USERS_FILE)
     if email not in users:
@@ -164,10 +152,8 @@ def sign_in(email, password):
     st.session_state.user = email
     return True
 
-
 def get_user_profile(email):
     return load_data(USERS_FILE).get(email)
-
 
 def log_water(email, amount_ml):
     logs = load_data(LOGS_FILE)
@@ -176,16 +162,13 @@ def log_water(email, amount_ml):
     logs[email][today] += int(amount_ml)
     save_data(LOGS_FILE, logs)
 
-
 def get_today_log(email):
     logs = load_data(LOGS_FILE)
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     return logs.get(email, {}).get(today, 0)
 
-
 def get_logs(email):
     return load_data(LOGS_FILE).get(email, {})
-
 
 def award_badge(email, badge_name):
     badges = load_data(BADGES_FILE)
@@ -194,10 +177,8 @@ def award_badge(email, badge_name):
         badges[email].append(badge_name)
     save_data(BADGES_FILE, badges)
 
-
 def get_badges(email):
     return load_data(BADGES_FILE).get(email, [])
-
 
 def send_reminder():
     st.toast("💧 Time to drink water!", icon="💧")
@@ -211,7 +192,6 @@ def send_reminder():
         except Exception:
             pass
 
-
 # ---------------- QUOTES ----------------
 MOTIVATION_QUOTES = [
     "💪 Keep going! Every sip counts!",
@@ -223,10 +203,8 @@ MOTIVATION_QUOTES = [
     "🏅 Consistency makes champions!"
 ]
 
-
 def get_quote():
     return random.choice(MOTIVATION_QUOTES)
-
 
 # ---------------- PLOT ----------------
 def plot_progress_chart(email):
@@ -250,7 +228,6 @@ def plot_progress_chart(email):
         plt.text(bar.get_x() + bar.get_width()/2, val + 50, f"{val}", ha="center", fontsize=9)
 
     st.pyplot(plt)
-
 
 # ---------------- MAIN ----------------
 def main():
@@ -332,7 +309,6 @@ def main():
     else:
         mascot_path = MASCOT_SUPER
 
-    # ---------------- SHOW MASCOT ON RIGHT SIDE ----------------
     col_left, col_right = st.columns([2, 1])
     with col_right:
         if mascot_path:
@@ -392,19 +368,36 @@ def main():
 
     st.markdown("---")
 
+    # ---------------- SMART REMINDERS (1-min start) ----------------
     st.markdown("### ⏰ Smart Reminders")
     enable = st.checkbox("Enable Reminders", value=False)
     interval = st.slider("Reminder Frequency (minutes)", 15, 120, 30)
 
     if enable:
+        # Initialize next_reminder 1 minute from now if not set
         if "next_reminder" not in st.session_state:
-            st.session_state.next_reminder = datetime.now(timezone.utc) + timedelta(minutes=interval)
+            st.session_state.next_reminder = datetime.now(timezone.utc) + timedelta(minutes=1)
 
-        if datetime.now(timezone.utc) >= st.session_state.next_reminder:
-            send_reminder()
-            st.session_state.next_reminder = datetime.now(timezone.utc) + timedelta(minutes=interval)
+        now = datetime.now(timezone.utc)
+        if now >= st.session_state.next_reminder:
+            # Show Streamlit toast
+            st.toast("💧 Time to drink water!", icon="💧")
 
-        st.info(f"💧 Reminder active! Every {interval} minutes.")
+            # Desktop notification
+            if notification:
+                try:
+                    notification.notify(
+                        title="💧 Water Buddy Reminder",
+                        message="Time to hydrate!",
+                        timeout=5
+                    )
+                except Exception:
+                    pass
+
+            # Update next reminder using user-selected interval
+            st.session_state.next_reminder = now + timedelta(minutes=interval)
+
+        st.info(f"💧 Reminder active! First reminder in 1 minute, then every {interval} minutes.")
     else:
         st.warning("Reminders are off. Enable to stay hydrated!")
 
@@ -419,7 +412,5 @@ def main():
     else:
         st.error("🥵 Less than 50%. Time to hydrate, champ!")
 
-
 if __name__ == "__main__":
     main()
-
