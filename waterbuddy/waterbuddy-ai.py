@@ -13,22 +13,11 @@ try:
 except Exception:
     notification = None
 
-# ---------------- MASCOTS (robust path resolution) ----------------
-def _resolve_mascot(filename):
-    # 1) check relative to current script / working dir
-    if os.path.exists(filename):
-        return filename
-    # 2) fallback to /mnt/data (if you uploaded there)
-    alt = os.path.join("/mnt/data", os.path.basename(filename))
-    if os.path.exists(alt):
-        return alt
-    # 3) not found
-    return None
-
-MASCOT_SAD = _resolve_mascot("Water_Dragon_Sad_Slim.jpg")
-MASCOT_ANGRY = _resolve_mascot("Water_Dragon_Angry_Cute_Stare.jpg")
-MASCOT_HAPPY = _resolve_mascot("Water_Dragon_Little_Happy_Slim.jpg")
-MASCOT_SUPER = _resolve_mascot("Water_Dragon_Happy.jpg")
+# ---------------- MASCOTS ----------------
+MASCOT_SAD = "/mnt/data/Water_Dragon_Sad_Slim.jpg"
+MASCOT_ANGRY = "/mnt/data/Water_Dragon_Angry_Cute_Stare.jpg"
+MASCOT_HAPPY = "/mnt/data/Water_Dragon_Little_Happy_Slim.jpg"
+MASCOT_SUPER = "/mnt/data/Water_Dragon_Happy.jpg"
 
 USERS_FILE = "users.json"
 LOGS_FILE = "logs.json"
@@ -288,16 +277,10 @@ def main():
     else:
         mascot_path = MASCOT_SUPER
 
-    # ---------------- SHOW MASCOT ON RIGHT SIDE ----------------
-    col_left, col_right = st.columns([2, 1])
-    with col_right:
-        if mascot_path:
-            try:
-                st.image(mascot_path, width=250, caption="Your Water Buddy 🐉")
-            except Exception:
-                st.write("🐉 (mascot)")
-        else:
-            st.write("🐉 (mascot image not found)")
+    # ---------------- SHOW MASCOT IN CENTER ----------------
+    center = st.columns([1, 2, 1])
+    with center[1]:
+        st.image(mascot_path, width=300, caption="Your Water Buddy 🐉")
 
     # ---- ⚙️ CUSTOM GOAL ----
     st.markdown("#### ⚙️ Customize Daily Goal")
