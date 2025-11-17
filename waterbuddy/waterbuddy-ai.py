@@ -26,7 +26,6 @@ def _resolve_mascot(filename):
     return None
 
 MASCOT_SAD = _resolve_mascot("Water_Dragon_Sad_Slim.jpg")
-MASCOT_ANGRY = _resolve_mascot("Water_Dragon_Angry_Cute_Stare.jpg")
 MASCOT_HAPPY = _resolve_mascot("Water_Dragon_Little_Happy_Slim.jpg")
 MASCOT_SUPER = _resolve_mascot("Water_Dragon_Happy.jpg")
 
@@ -369,4 +368,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
