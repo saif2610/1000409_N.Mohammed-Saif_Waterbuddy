@@ -13,6 +13,12 @@ try:
 except Exception:
     notification = None
 
+# ---------------- MASCOTS ----------------
+MASCOT_SAD = "/mnt/data/Water_Dragon_Sad_Slim.jpg"
+MASCOT_ANGRY = "/mnt/data/Water_Dragon_Angry_Cute_Stare.jpg"
+MASCOT_HAPPY = "/mnt/data/Water_Dragon_Little_Happy_Slim.jpg"
+MASCOT_SUPER = "/mnt/data/Water_Dragon_Happy.jpg"
+
 USERS_FILE = "users.json"
 LOGS_FILE = "logs.json"
 BADGES_FILE = "badges.json"
@@ -98,12 +104,12 @@ def calculate_daily_goal(age, conditions):
     elif age > 60: base = 1700
     return int(base * calculate_health_adjustment(conditions))
 
-def sign_up(name, email, password, age, profession, health_conditions):
+def sign_up(name, email, password, age, profession, health_conditions, custom_goal):
     users = load_data(USERS_FILE)
     if email in users:
         st.error("😕 Email already registered.")
         return False
-    goal = calculate_daily_goal(age, health_conditions)
+    goal = custom_goal
     users[email] = {
         "name": name,
         "profession": profession,
@@ -220,10 +226,11 @@ def main():
                 "Diabetes": st.checkbox("🩸 Diabetes"),
                 "Kidney Issue": st.checkbox("🦵 Kidney Issue")
             }
+            custom_goal = st.number_input("💧 Set your daily water goal (ml)", 1000, 5000, 2000)
             if st.button("Sign Up 💧", use_container_width=True):
                 if not (name and email and password and profession):
                     st.error("Please fill in all fields.")
-                elif sign_up(name, email, password, age, profession, health_conditions):
+                elif sign_up(name, email, password, age, profession, health_conditions, custom_goal):
                     st.success("✅ Sign-up successful! Please sign in now.")
         else:
             if st.button("Sign In 💦", use_container_width=True):
@@ -259,6 +266,32 @@ def main():
     st.markdown(f"### 💧 Today's Hydration: **{today_total} ml / {daily_goal} ml** ({progress}%)")
     st.progress(min(progress, 100))
     st.info(get_quote())
+
+    # --------------- MASCOT LOGIC ----------------
+    if progress < 30:
+        mascot_path = MASCOT_SAD
+    elif progress < 60:
+        mascot_path = MASCOT_ANGRY
+    elif progress < 100:
+        mascot_path = MASCOT_HAPPY
+    else:
+        mascot_path = MASCOT_SUPER
+
+    # ---------------- SHOW MASCOT IN CENTER ----------------
+    center = st.columns([1, 2, 1])
+    with center[1]:
+        st.image(mascot_path, width=300, caption="Your Water Buddy 🐉")
+
+    # ---- ⚙️ CUSTOM GOAL ----
+    st.markdown("#### ⚙️ Customize Daily Goal")
+    new_goal = st.number_input("Set new daily goal (ml):", 1000, 5000, daily_goal)
+    if st.button("Update Goal 🚀"):
+        users = load_data(USERS_FILE)
+        users[email]["daily_goal"] = new_goal
+        save_data(USERS_FILE, users)
+        st.success(f"✅ Goal updated to {new_goal} ml!")
+        time.sleep(1)
+        st.rerun()
 
     c1, c2, c3 = st.columns(3)
     with c1:
@@ -319,4 +352,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
