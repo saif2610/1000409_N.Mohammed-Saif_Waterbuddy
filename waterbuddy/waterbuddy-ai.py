@@ -13,22 +13,6 @@ try:
 except Exception:
     notification = None
 
-# ---------------- MASCOTS (robust path resolution) ----------------
-def _resolve_mascot(filename):
-    # 1) check relative to current script / working dir
-    if os.path.exists(filename):
-        return filename
-    # 2) fallback to /mnt/data (if you uploaded there)
-    alt = os.path.join("/mnt/data", os.path.basename(filename))
-    if os.path.exists(alt):
-        return alt
-    # 3) not found
-    return None
-
-MASCOT_SAD = _resolve_mascot("Water_Dragon_Sad_Slim.jpg")
-MASCOT_HAPPY = _resolve_mascot("Water_Dragon_Little_Happy_Slim.jpg")
-MASCOT_SUPER = _resolve_mascot("Water_Dragon_Happy.jpg")
-
 USERS_FILE = "users.json"
 LOGS_FILE = "logs.json"
 BADGES_FILE = "badges.json"
@@ -114,12 +98,12 @@ def calculate_daily_goal(age, conditions):
     elif age > 60: base = 1700
     return int(base * calculate_health_adjustment(conditions))
 
-def sign_up(name, email, password, age, profession, health_conditions, custom_goal):
+def sign_up(name, email, password, age, profession, health_conditions):
     users = load_data(USERS_FILE)
     if email in users:
         st.error("😕 Email already registered.")
         return False
-    goal = custom_goal
+    goal = calculate_daily_goal(age, health_conditions)
     users[email] = {
         "name": name,
         "profession": profession,
@@ -236,11 +220,10 @@ def main():
                 "Diabetes": st.checkbox("🩸 Diabetes"),
                 "Kidney Issue": st.checkbox("🦵 Kidney Issue")
             }
-            custom_goal = st.number_input("💧 Set your daily water goal (ml)", 1000, 5000, 2000)
             if st.button("Sign Up 💧", use_container_width=True):
                 if not (name and email and password and profession):
                     st.error("Please fill in all fields.")
-                elif sign_up(name, email, password, age, profession, health_conditions, custom_goal):
+                elif sign_up(name, email, password, age, profession, health_conditions):
                     st.success("✅ Sign-up successful! Please sign in now.")
         else:
             if st.button("Sign In 💦", use_container_width=True):
@@ -276,38 +259,6 @@ def main():
     st.markdown(f"### 💧 Today's Hydration: **{today_total} ml / {daily_goal} ml** ({progress}%)")
     st.progress(min(progress, 100))
     st.info(get_quote())
-
-    # --------------- MASCOT LOGIC ----------------
-    if progress < 30:
-        mascot_path = MASCOT_SAD
-    elif progress < 60:
-        mascot_path = MASCOT_ANGRY
-    elif progress < 100:
-        mascot_path = MASCOT_HAPPY
-    else:
-        mascot_path = MASCOT_SUPER
-
-    # ---------------- SHOW MASCOT ON RIGHT SIDE ----------------
-    col_left, col_right = st.columns([2, 1])
-    with col_right:
-        if mascot_path:
-            try:
-                st.image(mascot_path, width=250, caption="Your Water Buddy 🐉")
-            except Exception:
-                st.write("🐉 (mascot)")
-        else:
-            st.write("🐉 (mascot image not found)")
-
-    # ---- ⚙️ CUSTOM GOAL ----
-    st.markdown("#### ⚙️ Customize Daily Goal")
-    new_goal = st.number_input("Set new daily goal (ml):", 1000, 5000, daily_goal)
-    if st.button("Update Goal 🚀"):
-        users = load_data(USERS_FILE)
-        users[email]["daily_goal"] = new_goal
-        save_data(USERS_FILE, users)
-        st.success(f"✅ Goal updated to {new_goal} ml!")
-        time.sleep(1)
-        st.rerun()
 
     c1, c2, c3 = st.columns(3)
     with c1:
@@ -368,5 +319,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
