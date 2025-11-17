@@ -13,11 +13,22 @@ try:
 except Exception:
     notification = None
 
-# ---------------- MASCOTS ----------------
-MASCOT_SAD = "/mnt/data/Water_Dragon_Sad_Slim.jpg"
-MASCOT_ANGRY = "/mnt/data/Water_Dragon_Angry_Cute_Stare.jpg"
-MASCOT_HAPPY = "/mnt/data/Water_Dragon_Little_Happy_Slim.jpg"
-MASCOT_SUPER = "/mnt/data/Water_Dragon_Happy.jpg"
+# ---------------- MASCOTS (robust path resolution) ----------------
+def _resolve_mascot(filename):
+    # 1) check relative to current script / working dir
+    if os.path.exists(filename):
+        return filename
+    # 2) fallback to /mnt/data (if you uploaded there)
+    alt = os.path.join("/mnt/data", os.path.basename(filename))
+    if os.path.exists(alt):
+        return alt
+    # 3) not found
+    return None
+
+MASCOT_SAD = _resolve_mascot("Water_Dragon_Sad_Slim.jpg")
+MASCOT_ANGRY = _resolve_mascot("Water_Dragon_Angry_Cute_Stare.jpg")
+MASCOT_HAPPY = _resolve_mascot("Water_Dragon_Little_Happy_Slim.jpg")
+MASCOT_SUPER = _resolve_mascot("Water_Dragon_Happy.jpg")
 
 USERS_FILE = "users.json"
 LOGS_FILE = "logs.json"
@@ -280,11 +291,13 @@ def main():
     # ---------------- SHOW MASCOT ON RIGHT SIDE ----------------
     col_left, col_right = st.columns([2, 1])
     with col_right:
-        try:
-            st.image(mascot_path, width=250, caption="Your Water Buddy 🐉")
-        except Exception:
-            # If image can't load, show a small fallback message
-            st.write("🐉 (mascot)")
+        if mascot_path:
+            try:
+                st.image(mascot_path, width=250, caption="Your Water Buddy 🐉")
+            except Exception:
+                st.write("🐉 (mascot)")
+        else:
+            st.write("🐉 (mascot image not found)")
 
     # ---- ⚙️ CUSTOM GOAL ----
     st.markdown("#### ⚙️ Customize Daily Goal")
