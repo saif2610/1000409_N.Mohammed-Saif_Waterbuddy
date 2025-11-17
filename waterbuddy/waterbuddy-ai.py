@@ -327,8 +327,6 @@ def main():
     # --------------- MASCOT LOGIC ----------------
     if progress < 30:
         mascot_path = MASCOT_SAD
-    elif progress < 60:
-        mascot_path = MASCOT_ANGRY
     elif progress < 100:
         mascot_path = MASCOT_HAPPY
     else:
@@ -424,3 +422,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
