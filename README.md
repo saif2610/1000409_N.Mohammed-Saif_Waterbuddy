@@ -85,7 +85,19 @@ The app features **animated balloons 🎈**, **motivational quotes 💬**, **wee
 - **Styling:** Custom CSS + Streamlit layout  
 
 ---
+Credits
 
+Water Buddy was created with dedication, creativity, and a passion for helping users build healthier hydration habits.
+This project was made possible through the guidance, support, and encouragement of several key contributors:
+
+
+Project Mentor / Teacher:Mrs syed ali beema – For providing invaluable guidance, constant support, and expert insights that helped shape the development of Water Buddy.
+
+Design & Concept Support:AI tools,chat GPT Friends and peers who shared ideas, feedback, and suggestions to refine the app’s functionality and appearance.
+
+Testing Team: Everyone who tested early versions of Water Buddy and helped identify improvements to make the app smoother and more user-friendly.
+
+Motivation & Inspiration: All users who believe in building healthier habits — your encouragement fueled this project.
 
 
 
