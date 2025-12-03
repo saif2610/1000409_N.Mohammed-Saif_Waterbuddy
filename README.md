@@ -99,5 +99,5 @@ Testing Team: Everyone who tested early versions of Water Buddy and helped ident
 
 Motivation & Inspiration: All users who believe in building healthier habits — your encouragement fueled this project.
 
-
+Water Buddy: An Intelligent Hydration Tracking System Using Python, Streamlit, Tkinter, and Turtle Graphics. (2025). Developed with computational assistance from ChatGPT (OpenAI) and visual-design support via Lovart AI. Project authored and finalized by N. Mohammed Saif.
 
