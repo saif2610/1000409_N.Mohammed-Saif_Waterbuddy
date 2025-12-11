@@ -209,6 +209,22 @@ def get_quote():
 # ---------------- PLOT ----------------
 def plot_progress_chart(email):
     logs = get_logs(email)
+
+    # 🔁 RESET TODAY BUTTON ADDED — TOP OF GRAPH
+    st.markdown("### 🔄 Reset Today's Water Intake")
+    if st.button("Reset Today (Top of Graph)"):
+        today_key = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        logs_all = load_data(LOGS_FILE)
+
+        if email in logs_all and today_key in logs_all[email]:
+            logs_all[email][today_key] = 0
+            save_data(LOGS_FILE, logs_all)
+            st.success("Today's intake has been reset!")
+            time.sleep(1)
+            st.rerun()
+        else:
+            st.info("No intake logged today.")
+
     today = datetime.now(timezone.utc).date()
     dates = [today - timedelta(days=i) for i in range(6, -1, -1)]
     labels = [d.strftime("%b %d") for d in dates]
@@ -236,7 +252,7 @@ def main():
     if "user" not in st.session_state:
         st.session_state.user = None
 
-    # ----------- LOGIN / SIGN UP -----------
+    # ----------- LOGIN / SIGN UP ----------- #
     if not st.session_state.user:
         st.markdown("### Stay hydrated and healthy every day 💙")
         option = st.selectbox("Choose an option:", ["Sign In", "Sign Up"])
@@ -271,7 +287,7 @@ def main():
 
         return
 
-    # ----------- DASHBOARD -----------
+    # ----------- DASHBOARD ----------- #
     email = st.session_state.user
     profile = get_user_profile(email)
     if not profile:
@@ -374,16 +390,12 @@ def main():
     interval = st.slider("Reminder Frequency (minutes)", 15, 120, 30)
 
     if enable:
-        # Initialize next_reminder 1 minute from now if not set
         if "next_reminder" not in st.session_state:
             st.session_state.next_reminder = datetime.now(timezone.utc) + timedelta(minutes=1)
 
         now = datetime.now(timezone.utc)
         if now >= st.session_state.next_reminder:
-            # Show Streamlit toast
             st.toast("💧 Time to drink water!", icon="💧")
-
-            # Desktop notification
             if notification:
                 try:
                     notification.notify(
@@ -394,9 +406,7 @@ def main():
                 except Exception:
                     pass
 
-            # Update next reminder using user-selected interval
             st.session_state.next_reminder = now + timedelta(minutes=interval)
-
         st.info(f"💧 Reminder active! First reminder in 1 minute, then every {interval} minutes.")
     else:
         st.warning("Reminders are off. Enable to stay hydrated!")
@@ -414,4 +424,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
