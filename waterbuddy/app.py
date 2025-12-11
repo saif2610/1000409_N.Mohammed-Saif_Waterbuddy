@@ -129,7 +129,6 @@ def sign_up(name, email, password, age, profession, health_conditions, custom_go
         st.error("😕 Email already registered.")
         return False
 
-    # ✔ UPDATED: Auto-goal if custom goal is empty
     goal = custom_goal if custom_goal else calculate_daily_goal(age, health_conditions)
 
     users[email] = {
@@ -356,7 +355,7 @@ def main():
             time.sleep(1.5)
             st.rerun()
 
-    # ---------------- RESET TODAY'S INTAKE (NEW) ----------------
+    # ---------------- RESET TODAY'S INTAKE (TOP BUTTON) ----------------
     st.markdown("### 🔄 Reset Today's Intake")
 
     if st.button("Reset Today's Water Intake ❌"):
@@ -374,6 +373,21 @@ def main():
 
     st.markdown("---")
     plot_progress_chart(email)
+
+    # ---------------- RESET BELOW GRAPH (NEW) ----------------
+    st.markdown("### 🔄 Reset Today's Intake (Below Graph)")
+    if st.button("Reset Intake (Graph Section) ❌"):
+        logs = load_data(LOGS_FILE)
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+        if email in logs and today in logs[email]:
+            logs[email][today] = 0
+            save_data(LOGS_FILE, logs)
+            st.success("Today's intake reset!")
+            time.sleep(1)
+            st.rerun()
+        else:
+            st.info("No intake recorded for today.")
 
     if progress >= 100:
         award_badge(email, "🏅 Hydration Hero")
