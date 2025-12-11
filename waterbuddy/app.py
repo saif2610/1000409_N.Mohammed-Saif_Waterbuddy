@@ -99,6 +99,25 @@ def add_water_intake(email):
 def show_weekly_graph(email):
     st.subheader("📊 Weekly Water Intake")
 
+    # ---------------------------------------------------------------
+    # ✅ RESET BUTTON MOVED TO TOP OF GRAPH SECTION
+    # ---------------------------------------------------------------
+    st.markdown("### 🔁 Reset Today's Water Intake")
+
+    logs = load_data(LOGS_FILE)
+    today_key = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    if st.button("Reset Today (Top of Graph)"):
+        if email in logs and today_key in logs[email]:
+            logs[email][today_key] = 0
+            save_data(LOGS_FILE, logs)
+            st.success("Today's data has been reset!")
+            time.sleep(1)
+            st.rerun()
+        else:
+            st.info("No water intake logged for today.")
+    # ---------------------------------------------------------------
+
     logs = load_data(LOGS_FILE)
     today = datetime.now(timezone.utc).date()
     dates = [(today - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(6, -1, -1)]
@@ -113,25 +132,6 @@ def show_weekly_graph(email):
     plt.title("Past 7 Days Water Intake")
 
     st.pyplot(plt)
-
-    # ---------------------------------------------------------------
-    # ✅ NEW BUTTON ADDED BELOW GRAPH (you requested this)
-    # ---------------------------------------------------------------
-    st.markdown("### 🔁 Reset Today's Water Intake (Below Graph)")
-
-    if st.button("Reset Today (Below Graph)"):
-        logs = load_data(LOGS_FILE)
-        today_key = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
-        if email in logs and today_key in logs[email]:
-            logs[email][today_key] = 0
-            save_data(LOGS_FILE, logs)
-            st.success("Today's data has been reset!")
-            time.sleep(1)
-            st.rerun()
-        else:
-            st.info("No water intake logged for today.")
-    # ---------------------------------------------------------------
 
 # ---------------------- Main App ----------------------
 def main():
