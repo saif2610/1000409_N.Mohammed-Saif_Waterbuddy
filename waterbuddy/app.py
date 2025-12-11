@@ -353,6 +353,18 @@ def main():
             time.sleep(1.5)
             st.rerun()
 
+    # ---------------- RESET BUTTON ADDED HERE ----------------
+    if st.button("Reset Today's Intake ❌"):
+        logs = load_data(LOGS_FILE)
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        if email in logs and today in logs[email]:
+            logs[email][today] = 0
+            save_data(LOGS_FILE, logs)
+        st.success("🔄 Today's water intake has been reset!")
+        time.sleep(1)
+        st.rerun()
+    # ---------------------------------------------------------
+
     st.markdown("---")
     plot_progress_chart(email)
 
@@ -374,16 +386,13 @@ def main():
     interval = st.slider("Reminder Frequency (minutes)", 15, 120, 30)
 
     if enable:
-        # Initialize next_reminder 1 minute from now if not set
         if "next_reminder" not in st.session_state:
             st.session_state.next_reminder = datetime.now(timezone.utc) + timedelta(minutes=1)
 
         now = datetime.now(timezone.utc)
         if now >= st.session_state.next_reminder:
-            # Show Streamlit toast
             st.toast("💧 Time to drink water!", icon="💧")
 
-            # Desktop notification
             if notification:
                 try:
                     notification.notify(
@@ -394,7 +403,6 @@ def main():
                 except Exception:
                     pass
 
-            # Update next reminder using user-selected interval
             st.session_state.next_reminder = now + timedelta(minutes=interval)
 
         st.info(f"💧 Reminder active! First reminder in 1 minute, then every {interval} minutes.")
