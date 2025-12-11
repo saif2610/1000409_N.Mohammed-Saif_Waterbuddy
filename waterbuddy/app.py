@@ -115,9 +115,9 @@ def show_weekly_graph(email):
     st.pyplot(plt)
 
     # ---------------------------------------------------------------
-    # ✅ NEW BUTTON ADDED EXACTLY AS REQUESTED (Below the Graph)
+    # ✅ NEW BUTTON ADDED BELOW GRAPH (you requested this)
     # ---------------------------------------------------------------
-    st.markdown("### 🔄 Reset Today's Water Intake (Below Graph)")
+    st.markdown("### 🔁 Reset Today's Water Intake (Below Graph)")
 
     if st.button("Reset Today (Below Graph)"):
         logs = load_data(LOGS_FILE)
