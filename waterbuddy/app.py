@@ -85,7 +85,7 @@ def add_water_intake(email):
     st.progress(min(logs[email][today] / 3000, 1.0))
     st.text(f"Total: {logs[email][today]} ml / 3000 ml")
 
-    if st.button("Reset Today's Water Intake ❌"):
+    if st.button("Reset Today's Water Intake ❌", key="reset_main"):
         logs[email][today] = 0
         save_data(LOGS_FILE, logs)
         st.success("Today's intake reset!")
@@ -100,14 +100,14 @@ def show_weekly_graph(email):
     st.subheader("📊 Weekly Water Intake")
 
     # ---------------------------------------------------------------
-    # ✅ RESET BUTTON MOVED TO TOP OF GRAPH SECTION
+    # RESET BUTTON PLACED AT TOP OF GRAPH SECTION (unique key)
     # ---------------------------------------------------------------
     st.markdown("### 🔁 Reset Today's Water Intake")
-
     logs = load_data(LOGS_FILE)
     today_key = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
-    if st.button("Reset Today (Top of Graph)"):
+    # unique key ensures this button doesn't conflict with other reset buttons
+    if st.button("Reset Today (Top of Graph)", key="reset_top_graph"):
         if email in logs and today_key in logs[email]:
             logs[email][today_key] = 0
             save_data(LOGS_FILE, logs)
