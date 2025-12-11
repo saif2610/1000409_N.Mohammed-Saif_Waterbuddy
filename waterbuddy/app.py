@@ -128,10 +128,7 @@ def sign_up(name, email, password, age, profession, health_conditions, custom_go
     if email in users:
         st.error("😕 Email already registered.")
         return False
-
-    # ✔ UPDATED: Auto-goal if custom goal is empty
-    goal = custom_goal if custom_goal else calculate_daily_goal(age, health_conditions)
-
+    goal = custom_goal
     users[email] = {
         "name": name,
         "profession": profession,
@@ -258,7 +255,7 @@ def main():
                 "Kidney Issue": st.checkbox("🦵 Kidney Issue")
             }
 
-            custom_goal = st.number_input("💧 Set your daily water goal (ml)", 0, 5000, 0)
+            custom_goal = st.number_input("💧 Set your daily water goal (ml)", 1000, 5000, 2000)
 
             if st.button("Sign Up 💧", use_container_width=True):
                 if not (name and email and password and profession):
@@ -356,22 +353,6 @@ def main():
             time.sleep(1.5)
             st.rerun()
 
-    # ---------------- RESET TODAY'S INTAKE (NEW) ----------------
-    st.markdown("### 🔄 Reset Today's Intake")
-
-    if st.button("Reset Today's Water Intake ❌"):
-        logs = load_data(LOGS_FILE)
-        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
-        if email in logs and today in logs[email]:
-            logs[email][today] = 0
-            save_data(LOGS_FILE, logs)
-            st.success("Today's water intake has been reset!")
-            time.sleep(1)
-            st.rerun()
-        else:
-            st.info("No intake recorded for today.")
-
     st.markdown("---")
     plot_progress_chart(email)
 
@@ -387,18 +368,22 @@ def main():
 
     st.markdown("---")
 
-    # ---------------- SMART REMINDERS ----------------
+    # ---------------- SMART REMINDERS (1-min start) ----------------
     st.markdown("### ⏰ Smart Reminders")
     enable = st.checkbox("Enable Reminders", value=False)
     interval = st.slider("Reminder Frequency (minutes)", 15, 120, 30)
 
     if enable:
+        # Initialize next_reminder 1 minute from now if not set
         if "next_reminder" not in st.session_state:
             st.session_state.next_reminder = datetime.now(timezone.utc) + timedelta(minutes=1)
 
         now = datetime.now(timezone.utc)
         if now >= st.session_state.next_reminder:
+            # Show Streamlit toast
             st.toast("💧 Time to drink water!", icon="💧")
+
+            # Desktop notification
             if notification:
                 try:
                     notification.notify(
@@ -409,6 +394,7 @@ def main():
                 except Exception:
                     pass
 
+            # Update next reminder using user-selected interval
             st.session_state.next_reminder = now + timedelta(minutes=interval)
 
         st.info(f"💧 Reminder active! First reminder in 1 minute, then every {interval} minutes.")
